@@ -1,15 +1,21 @@
-# PETORA Help — Phase 1 Prototype
+# PETORA Help — Phase 2A (MySQL)
 
-Modern, simple, responsive frontend prototype. React + Vite, no backend.
+Simple, responsive frontend + small Express/MySQL backend. No auth, no admin yet.
 
-## Run
+## Run (both required)
 
 ```bash
+# 1. Database (once): mysql -u root -p < backend/schema.sql
+# 2. Backend:  copy backend\.env.example backend\.env  (fill DB password)
+npm install --prefix backend
+npm --prefix backend start    # http://localhost:4000/api/health
+
+# 3. Frontend:
 npm install
-npm run dev
+npm run dev                   # http://localhost:5173
 ```
 
-Build: `npm run build` • Preview: `npm run preview`
+Full guide: **MYSQL_SETUP.md**. Production: `npm run build`, then the backend serves the site itself.
 
 ## Official logo
 
@@ -25,4 +31,4 @@ To replace: overwrite both files with the new image (same filenames).
 - "Bas 3 Steps" compact strip + "PETORA Help kya hai?" plain text
 - NGO section: single "NGO listings coming soon" empty state (no fake cards)
 - Simple footer: Home, About, Contact + © PETORA Help
-- Report modal submits for real: atomic Report ID (PH-PRY-YYYY-XXXXX) → photo/video to Firebase Storage → document in Firestore `reports` (status "Report Received"). See **FIREBASE_SETUP.md** — without `.env` config the form shows a setup notice and never fakes success.
+- Report modal submits for real: `POST /api/reports` → MySQL `reports` row (status "Report Received") + photo saved on server. Returns atomic Report ID (`PH-PRY-YYYY-XXXXX`) with Copy button. See **MYSQL_SETUP.md**.
