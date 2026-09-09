@@ -7,15 +7,17 @@
 - **Project:** PETORA Help (Phase 1 — frontend prototype only)
 - **Stack:** React 18 + Vite 5, plain CSS, no backend / DB / auth / payment
 - **Last Updated:** 2026-09-09
-- **Current Version:** v0.4.0 (visual warmth + compact pass, build passing)
+- **Current Version:** v0.5.0 (Phase 2A real Firebase submission, build passing)
 
 ---
 
 ## Current Status
 
 - [x] Minimal homepage: Navbar → Hero → 3 Actions → Bas 3 Steps → About → NGO empty state → Footer
-- [x] Report an Animal modal + success state + demo Report ID (simplified)
-- [x] NGO section: single "coming soon" empty state, no fake cards/data
+- [x] Report submission is REAL: atomic counter ID → Storage upload → Firestore `reports` doc (status "Report Received", server timestamp)
+- [x] Honest states: loading ("Report submit ho rahi hai..."), real errors + Try Again, success with Copy Report ID; setup notice when Firebase unconfigured
+- [x] Secure rules: public create-only on reports, forward-only counter, closed Storage (`firestore.rules`, `storage.rules`); setup guide in `FIREBASE_SETUP.md`
+- [x] Homepage UI untouched (same design, branding, sections)
 - [x] Responsive mobile-first design, Hinglish/हिंदी toggle (demo)
 - [x] `npm run build` passes
 - [x] Official logo integrated (navbar circle + favicon, from `src/logo.jpeg` / `public/logo.jpeg`)
@@ -43,6 +45,7 @@ npm run build
 
 | Date | Version | Change | Files Touched | Status |
 |------|---------|--------|---------------|--------|
+| 2026-09-09 | v0.5.0 | Phase 2A: real Firebase submission (atomic PH-PRY-YYYY-XXXXX IDs, Storage media, Firestore reports, loading/error/copy states, secure rules, setup guide); Firebase lazy-loaded; homepage untouched | `src/firebase.js`, `src/reports.js`, `src/App.jsx`, `src/index.css`, `firestore.rules`, `storage.rules`, `FIREBASE_SETUP.md`, `.env.example`, `.gitignore`, `package.json`, `README.md`, `PROGRESS.md` | ✅ Done (code verified; live test needs Firebase project — see FIREBASE_SETUP.md Step 5) |
 | 2026-09-09 | v0.4.0 | Visual-only pass: compact hero + warmer human-animal photo (with fallback), tinted action choices (red Report / green others), "Bas 3 Steps" strip, plain About text, single NGO empty state, tightened spacing, social placeholders | `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done |
 | 2026-09-09 | v0.3.0 | Simplified homepage ~65%: removed How It Works, Resources, Emergency, Mission, Contact, filters, donation catalogue; new hero copy; minimal nav/footer; trimmed CSS | `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done |
 | 2026-09-09 | v0.2.0 | Integrated uploaded official logo (navbar circle + favicon); copied src → public; build re-verified | `src/App.jsx`, `src/index.css`, `index.html`, `public/logo.jpeg`, `README.md`, `PROGRESS.md` | ✅ Done |

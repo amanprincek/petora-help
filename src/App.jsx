@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import logoImg from './logo.jpeg'
+import { isFirebaseConfigured } from './firebase.js'
+import { submitReport } from './reports.js'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=1200&auto=format&fit=crop'
 const HERO_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop'
@@ -25,18 +27,59 @@ function ReportModal({ open, onClose }) {
   const [location, setLocation] = useState('')
   const [desc, setDesc] = useState('')
   const [phone, setPhone] = useState('')
+  const [file, setFile] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const [done, setDone] = useState(null)
+  const [copied, setCopied] = useState(false)
 
   if (!open) return null
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
-    const id = `PH-PRY-2026-${String(Math.floor(100 + Math.random() * 900)).padStart(3, '0')}${Math.floor(Math.random() * 10)}`
-    setDone(id)
+    if (busy) return // prevent duplicate submissions
+    setError('')
+    setBusy(true)
+    try {
+      const reportId = await submitReport(
+        {
+          animalType: animal,
+          condition: problem,
+          location,
+          description: desc,
+          contactNumber: phone,
+          priority,
+        },
+        file
+      )
+      setDone(reportId)
+    } catch (err) {
+      setError(err?.message || 'Report submit nahi ho paayi. Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const copyId = async () => {
+    if (!done) return
+    try {
+      await navigator.clipboard.writeText(done)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = done
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const reset = () => {
-    setDone(null); setLocation(''); setDesc(''); setPhone('')
+    if (busy) return
+    setDone(null); setError(''); setLocation(''); setDesc('')
+    setPhone(''); setFile(null); setCopied(false)
     onClose()
   }
 
@@ -48,59 +91,91 @@ function ReportModal({ open, onClose }) {
             <h3>🆘 Report an Animal</h3>
             <p>Ghayal ya needy animal ki information dein.</p>
           </div>
-          <button className="x" onClick={reset} aria-label="Close">✕</button>
+          <button className="x" onClick={reset} aria-label="Close" disabled={busy}>✕</button>
         </div>
         <div className="modal-body">
+          {!isFirebaseConfigured && !done ? (
+            <div className="notice-warn">
+              ⚠️ <b>Online submission abhi setup nahi hai.</b><br />
+              Firebase connect karne ke liye <b>FIREBASE_SETUP.md</b> mein diye steps follow karein.
+              Tab tak report submit nahi hogi — koi fake confirmation nahi dikhaya jayega.
+            </div>
+          ) : null}
           {!done ? (
             <form onSubmit={submit}>
-              <div className="field" style={{ marginBottom: 12 }}>
-                <label>Animal Type</label>
-                <div className="seg">
-                  {['Dog / Kutta', 'Cow / Gaay', 'Cat / Billi', 'Other'].map((a) => (
-                    <button type="button" key={a} className={animal === a ? 'on' : ''} onClick={() => setAnimal(a)}>{a}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="field" style={{ marginBottom: 12 }}>
-                <label>Problem</label>
-                <div className="seg">
-                  {['Injured / Ghayal', 'Sick / Beemar', 'Trapped', 'Abandoned', 'Other'].map((p) => (
-                    <button type="button" key={p} className={problem === p ? 'on' : ''} onClick={() => setProblem(p)}>{p}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="field" style={{ marginBottom: 12 }}>
-                <label>📍 Location / Jagah</label>
-                <input required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Civil Lines, Prayagraj" />
-              </div>
-              <div className="field" style={{ marginBottom: 12 }}>
-                <label>Problem ke baare mein batayein</label>
-                <textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Animal ki situation..." />
-              </div>
-              <div className="grid2">
-                <div className="field">
-                  <label>Contact Number</label>
-                  <input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98XXXXXXXX" pattern="[0-9+ ]{8,15}" />
-                </div>
-                <div className="field">
-                  <label>Priority</label>
+              <fieldset disabled={busy || !isFirebaseConfigured} style={{ border: 0, padding: 0, margin: 0 }}>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label>Animal Type</label>
                   <div className="seg">
-                    {['Normal', 'Urgent'].map((p) => (
-                      <button type="button" key={p} className={priority === p ? 'on' : ''} onClick={() => setPriority(p)}>{p === 'Urgent' ? '🔴 Urgent' : 'Normal'}</button>
+                    {['Dog / Kutta', 'Cow / Gaay', 'Cat / Billi', 'Other'].map((a) => (
+                      <button type="button" key={a} className={animal === a ? 'on' : ''} onClick={() => setAnimal(a)}>{a}</button>
                     ))}
                   </div>
                 </div>
-              </div>
-              <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} type="submit">Submit Report</button>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label>Problem</label>
+                  <div className="seg">
+                    {['Injured / Ghayal', 'Sick / Beemar', 'Trapped / Phansa hua', 'Abandoned / Chhoda hua', 'Aggressive / Aakramak', 'Other'].map((p) => (
+                      <button type="button" key={p} className={problem === p ? 'on' : ''} onClick={() => setProblem(p)}>{p}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label>📷 Photo / Video (optional)</label>
+                  <label className="file">
+                    {file ? `📎 ${file.name}` : 'Animal ki photo ya video chunein (max 15MB)'}
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      hidden
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                </div>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label>📍 Location / Jagah</label>
+                  <input required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Civil Lines, Prayagraj" />
+                </div>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label>Problem ke baare mein batayein</label>
+                  <textarea value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Animal ki situation..." />
+                </div>
+                <div className="grid2">
+                  <div className="field">
+                    <label>Contact Number</label>
+                    <input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="98XXXXXXXX" pattern="[0-9+ ]{8,15}" />
+                  </div>
+                  <div className="field">
+                    <label>Priority</label>
+                    <div className="seg">
+                      {['Normal', 'Urgent'].map((p) => (
+                        <button type="button" key={p} className={priority === p ? 'on' : ''} onClick={() => setPriority(p)}>{p === 'Urgent' ? '🔴 Urgent' : 'Normal'}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              {error ? (
+                <div className="error-box">
+                  ❌ <b>Report submit nahi ho paayi.</b><br />{error}<br />Please try again.
+                  <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 10 }} onClick={() => setError('')}>Try Again</button>
+                </div>
+              ) : null}
+              <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} type="submit" disabled={busy || !isFirebaseConfigured}>
+                {busy ? <><span className="spinner" /> Report submit ho rahi hai...</> : 'Submit Report'}
+              </button>
             </form>
           ) : (
             <div className="success">
-              <div className="big">✅</div>
-              <h2 style={{ margin: '12px 0 4px' }}>Report Received</h2>
+              <div className="big">❤️</div>
+              <h2 style={{ margin: '12px 0 4px' }}>Report Received ❤️</h2>
               <p style={{ color: '#5d6f65', margin: 0 }}>Thank you for helping an animal.</p>
               <div className="report-id">Your Report ID<br />{done}</div>
-              <p style={{ fontSize: 14, color: '#5d6f65' }}>Is ID ko future tracking ke liye save karein.</p>
-              <button className="btn btn-primary" style={{ width: '100%' }} onClick={reset}>Done</button>
+              <p style={{ fontSize: 14, color: '#5d6f65' }}>Is Report ID ko save karke rakhein. Future mein isi ID se report status track kiya ja sakega.</p>
+              <div className="copy-row">
+                <button className="btn btn-outline btn-sm" onClick={copyId}>{copied ? '✓ Copied!' : '⧉ Copy Report ID'}</button>
+                <button className="btn btn-primary btn-sm" onClick={reset}>Done</button>
+              </div>
             </div>
           )}
         </div>

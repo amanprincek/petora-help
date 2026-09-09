@@ -1,0 +1,61 @@
+// Firestore rules for PETORA Help (Phase 2A).
+// Deploy: Firebase Console → Firestore Database → Rules → paste → Publish.
+// OR: firebase deploy --only firestore:rules
+//
+// Design (no login required for citizens):
+// - Anyone can CREATE a report, but can NEVER read/list/update/delete reports.
+// - The atomic counter can only move forward by exactly +1 (abuse-resistant).
+// - Admins read reports via the Firebase Console (IAM) — never via the site.
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Citizen reports: write-only for the public ----
+    match /reports/{reportId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'reportId', 'animalType', 'condition', 'location',
+          'description', 'contactNumber', 'priority', 'status',
+          'mediaUrl', 'mediaPath', 'mediaType', 'createdAt'
+        ])
+        && request.resource.data.reportId is string
+        && request.resource.data.reportId.matches('PH-PRY-[0-9]{4}-[0-9]+')
+        && request.resource.data.reportId.size() <= 30
+        && request.resource.data.animalType is string
+        && request.resource.data.animalType.size() > 0
+        && request.resource.data.animalType.size() <= 60
+        && request.resource.data.condition is string
+        && request.resource.data.condition.size() > 0
+        && request.resource.data.condition.size() <= 60
+        && request.resource.data.location is string
+        && request.resource.data.location.size() > 0
+        && request.resource.data.location.size() <= 300
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.contactNumber is string
+        && request.resource.data.contactNumber.size() >= 8
+        && request.resource.data.contactNumber.size() <= 15
+        && request.resource.data.priority in ['Normal', 'Urgent']
+        && request.resource.data.status == 'Report Received'
+        && request.resource.data.createdAt == request.time;
+
+      // Public must NEVER browse or modify reports.
+      allow read, update, delete: if false;
+    }
+
+    // ---- Atomic report-ID counter: forward-only ----
+    match /counters/reports {
+      // Needed so the app can read the current value inside a transaction.
+      // This exposes ONE number (the counter) — not report data.
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.resource.data.keys().hasOnly(['seq'])
+        && request.resource.data.seq == 1;
+      allow update: if request.resource.data.keys().hasOnly(['seq'])
+        && request.resource.data.seq is int
+        && request.resource.data.seq == resource.data.seq + 1;
+      allow delete: if false;
+    }
+  }
+}

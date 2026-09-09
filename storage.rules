@@ -1,0 +1,26 @@
+// Storage rules for PETORA Help (Phase 2A).
+// Deploy: Firebase Console → Storage → Rules → paste → Publish.
+// OR: firebase deploy --only storage
+//
+// - Public can UPLOAD animal photos/videos into reports/<reportId>/ only.
+// - Files limited to 15MB, images/videos only, reportId format enforced.
+// - Public can NEVER list, read, or delete files.
+// - Admins view files via the Firebase Console (IAM).
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /reports/{reportId}/{fileName} {
+      allow read, delete: if false;
+      allow write: if reportId.matches('PH-PRY-[0-9]{4}-[0-9]+')
+        && request.resource.size > 0
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*|video/.*');
+    }
+    // Everything else is closed.
+    match /{allPaths=**} {
+      allow read, write, delete: if false;
+    }
+  }
+}

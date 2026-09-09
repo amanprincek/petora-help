@@ -55,6 +55,15 @@ button{font-family:inherit}
 .btn-accent{background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(232,93,42,.28)}
 .btn-accent:hover{filter:brightness(.95)}
 .btn-sm{padding:9px 16px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.file{display:block;border:1.5px dashed #9ec7ad;background:var(--green-50);border-radius:12px;padding:13px 14px;font-size:14px;color:#2c4a38;cursor:pointer}
+fieldset:disabled .file{opacity:.6;cursor:not-allowed}
+.notice-warn{background:#fff8ec;border:1.5px solid #e8c872;border-radius:14px;padding:14px;font-size:14px;color:#6b5518;margin-bottom:14px}
+.error-box{background:#fdf0ec;border:1.5px solid #e8a58c;border-radius:14px;padding:14px;font-size:14px;color:#8a3b1f;margin-top:14px}
+.spinner{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.copy-row{display:flex;gap:10px;margin-top:6px}
+.copy-row .btn{flex:1}
 .hamburger{display:none;border:1px solid var(--line);background:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer}
 .mobile-menu{display:none;border-top:1px solid var(--line);background:#fff;padding:6px 4%}
 .mobile-menu a{display:block;padding:12px 8px;text-decoration:none;font-weight:700;border-bottom:1px solid #f0f0f0}

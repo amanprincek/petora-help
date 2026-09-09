@@ -25,4 +25,4 @@ To replace: overwrite both files with the new image (same filenames).
 - "Bas 3 Steps" compact strip + "PETORA Help kya hai?" plain text
 - NGO section: single "NGO listings coming soon" empty state (no fake cards)
 - Simple footer: Home, About, Contact + © PETORA Help
-- Report modal with success state + demo Report ID (e.g. PH-PRY-2026-00124), local state only
+- Report modal submits for real: atomic Report ID (PH-PRY-YYYY-XXXXX) → photo/video to Firebase Storage → document in Firestore `reports` (status "Report Received"). See **FIREBASE_SETUP.md** — without `.env` config the form shows a setup notice and never fakes success.
