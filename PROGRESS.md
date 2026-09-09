@@ -1,0 +1,73 @@
+# PETORA Help — Progress Tracker
+
+> **Rule:** Update this file on EVERY change / updation.
+> Add a new row to `Change Log` + update `Current Status` + bump `Last Updated`.
+> Format: `YYYY-MM-DD — short title`
+
+- **Project:** PETORA Help (Phase 1 — frontend prototype only)
+- **Stack:** React 18 + Vite 5, plain CSS, no backend / DB / auth / payment
+- **Last Updated:** 2026-09-09
+- **Current Version:** v0.4.0 (visual warmth + compact pass, build passing)
+
+---
+
+## Current Status
+
+- [x] Minimal homepage: Navbar → Hero → 3 Actions → Bas 3 Steps → About → NGO empty state → Footer
+- [x] Report an Animal modal + success state + demo Report ID (simplified)
+- [x] NGO section: single "coming soon" empty state, no fake cards/data
+- [x] Responsive mobile-first design, Hinglish/हिंदी toggle (demo)
+- [x] `npm run build` passes
+- [x] Official logo integrated (navbar circle + favicon, from `src/logo.jpeg` / `public/logo.jpeg`)
+- [ ] Real NGO data (waiting on admin input — Phase 2)
+- [ ] Backend / tracking / payment (explicitly out of scope for Phase 1)
+
+## How To Run
+
+```bash
+npm install
+npm run dev
+npm run build
+```
+
+## How To Update This File (for every future change)
+
+1. Add row to `Change Log` below (newest on top).
+2. Update `Last Updated` + `Current Version` at top.
+3. Update `Current Status` checkboxes if scope changed.
+4. Keep it to 2–5 lines per change — link files touched.
+
+---
+
+## Change Log
+
+| Date | Version | Change | Files Touched | Status |
+|------|---------|--------|---------------|--------|
+| 2026-09-09 | v0.4.0 | Visual-only pass: compact hero + warmer human-animal photo (with fallback), tinted action choices (red Report / green others), "Bas 3 Steps" strip, plain About text, single NGO empty state, tightened spacing, social placeholders | `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done |
+| 2026-09-09 | v0.3.0 | Simplified homepage ~65%: removed How It Works, Resources, Emergency, Mission, Contact, filters, donation catalogue; new hero copy; minimal nav/footer; trimmed CSS | `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done |
+| 2026-09-09 | v0.2.0 | Integrated uploaded official logo (navbar circle + favicon); copied src → public; build re-verified | `src/App.jsx`, `src/index.css`, `index.html`, `public/logo.jpeg`, `README.md`, `PROGRESS.md` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Created PROGRESS.md tracker; documented Phase 1 baseline | `PROGRESS.md` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Added README with run instructions + logo slot documentation | `README.md` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Verified production build passes (`vite build` — 31 modules, no errors) | `dist/` (output) | ✅ Done |
+| 2026-09-09 | v0.1.0 | Built all homepage sections + Report modal + Find NGO + Donate + Contact + Footer; fixed logo fallback + footer style bug | `src/App.jsx`, `src/index.css` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Added global stylesheet: green/beige theme, responsive breakpoints (900px / 520px), modal/cards/footer styles | `src/index.css` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Added React entry + all UI components (Navbar, Hero, Actions, HowItWorks, NGO, Donate, Emergency, Mission, Contact) | `src/main.jsx`, `src/App.jsx` | ✅ Done |
+| 2026-09-09 | v0.1.0 | Scaffolded Vite React app (React 18, plugin-react, Google Fonts, title/meta) | `package.json`, `vite.config.js`, `index.html` | ✅ Done |
+
+---
+
+## Product Rules Locked (do not violate without explicit approval)
+
+- Brand is always **PETORA Help** — never Fedora / Patora / other spelling.
+- No real NGO names, phone numbers, Instagram handles, or addresses. Only `Verified NGO — Prayagraj` / `Details coming soon` placeholders.
+- NEVER list `love_shade_for_animals` or `rakshamad` unless explicitly permitted.
+- No fake stats (no "500+ rescued" etc.).
+- No auth, DB, Firebase, payment gateway, admin panel, AI, backend in Phase 1.
+- Wording: `Starting from Prayagraj` / `Prayagraj se shuruaat` — never claim all-India operation.
+- PETORA Help is a **connector/mediator, NOT an NGO**.
+
+## Pending / Next Up
+
+- [ ] Add official logo file at `public/logo.png` (auto-picked up by navbar)
+- [ ] Replace demo hero image with approved photography if needed
+- [ ] Phase 2 (only when approved): real NGO data model, report tracking, admin-managed requirements
