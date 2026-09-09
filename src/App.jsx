@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import logoImg from './logo.jpeg'
-import { isFirebaseConfigured } from './firebase.js'
-import { submitReport } from './reports.js'
+import { submitReport } from './api.js'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=1200&auto=format&fit=crop'
 const HERO_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop'
@@ -94,16 +93,9 @@ function ReportModal({ open, onClose }) {
           <button className="x" onClick={reset} aria-label="Close" disabled={busy}>✕</button>
         </div>
         <div className="modal-body">
-          {!isFirebaseConfigured && !done ? (
-            <div className="notice-warn">
-              ⚠️ <b>Online submission abhi setup nahi hai.</b><br />
-              Firebase connect karne ke liye <b>FIREBASE_SETUP.md</b> mein diye steps follow karein.
-              Tab tak report submit nahi hogi — koi fake confirmation nahi dikhaya jayega.
-            </div>
-          ) : null}
           {!done ? (
             <form onSubmit={submit}>
-              <fieldset disabled={busy || !isFirebaseConfigured} style={{ border: 0, padding: 0, margin: 0 }}>
+              <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0 }}>
                 <div className="field" style={{ marginBottom: 12 }}>
                   <label>Animal Type</label>
                   <div className="seg">
@@ -161,7 +153,7 @@ function ReportModal({ open, onClose }) {
                   <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 10 }} onClick={() => setError('')}>Try Again</button>
                 </div>
               ) : null}
-              <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} type="submit" disabled={busy || !isFirebaseConfigured}>
+              <button className="btn btn-primary" style={{ width: '100%', marginTop: 16 }} type="submit" disabled={busy}>
                 {busy ? <><span className="spinner" /> Report submit ho rahi hai...</> : 'Submit Report'}
               </button>
             </form>
