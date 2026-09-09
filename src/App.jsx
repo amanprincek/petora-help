@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import logoImg from './logo.jpeg'
-import { submitReport } from './api.js'
+import { findOrganizations, submitReport, trackReport } from './api.js'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=1200&auto=format&fit=crop'
 const HERO_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop'
@@ -176,10 +176,242 @@ function ReportModal({ open, onClose }) {
   )
 }
 
+const TRACK_STAGES = [
+  'Report Received',
+  'Verified',
+  'Rescue Assigned',
+  'Rescue Team On The Way',
+  'Animal Rescued',
+  'Case Closed',
+]
+
+function formatDate(value) {
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+  })
+}
+
+function TrackModal({ open, onClose }) {
+  const [id, setId] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [report, setReport] = useState(null)
+
+  if (!open) return null
+
+  const lookup = async (e) => {
+    e.preventDefault()
+    if (busy) return // prevent duplicate requests
+    setErr('')
+    setBusy(true)
+    try {
+      setReport(await trackReport(id))
+    } catch (e2) {
+      setErr(e2.code || 'NETWORK')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const reset = () => {
+    if (busy) return
+    setId(''); setReport(null); setErr('')
+    onClose()
+  }
+
+  const back = () => {
+    setReport(null); setErr('')
+  }
+
+  const stageIdx = report ? TRACK_STAGES.indexOf(report.status) : -1
+
+  return (
+    <div className="overlay" onClick={reset}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <h3>📍 Apni Report Track Karein</h3>
+            <p>Report ID enter karke apni report ka current status dekhein.</p>
+          </div>
+          <button className="x" onClick={reset} aria-label="Close" disabled={busy}>✕</button>
+        </div>
+        <div className="modal-body">
+          {!report ? (
+            <form onSubmit={lookup}>
+              <div className="field">
+                <label>Report ID</label>
+                <input
+                  value={id}
+                  onChange={(e) => setId(e.target.value.toUpperCase())}
+                  placeholder="PH-PRY-2026-XXXXX"
+                  autoComplete="off"
+                  disabled={busy}
+                />
+              </div>
+              {err === 'INVALID_ID' ? (
+                <div className="error-box">❌ Sahi Report ID likhein.<br />Example: PH-PRY-2026-XXXXX</div>
+              ) : null}
+              {err === 'NOT_FOUND' ? (
+                <div className="error-box">
+                  ❌ <b>Report nahi mili.</b><br />
+                  Please Report ID check karke dobara try karein.
+                </div>
+              ) : null}
+              {err === 'NETWORK' || err === 'SERVER_ERROR' ? (
+                <div className="error-box">
+                  ❌ Report check nahi ho paayi.<br />Please try again.
+                </div>
+              ) : null}
+              <button className="btn btn-primary" style={{ width: '100%', marginTop: 14 }} type="submit" disabled={busy || !id.trim()}>
+                {busy ? <><span className="spinner" /> Report check ho rahi hai...</> : 'Track Report'}
+              </button>
+            </form>
+          ) : (
+            <div>
+              <div className="track-fields">
+                <div><span>Report ID</span><b>{report.reportId}</b></div>
+                <div><span>Animal Type</span><b>{report.animalType}</b></div>
+                <div><span>Condition</span><b>{report.condition}</b></div>
+                <div><span>Location</span><b>{report.location}</b></div>
+                <div><span>Current Status</span><b className="status-now">{report.status}</b></div>
+                <div><span>Submitted Date</span><b>{formatDate(report.createdAt)}</b></div>
+              </div>
+              {stageIdx !== -1 ? (
+                <ol className="timeline">
+                  {TRACK_STAGES.map((s, i) => (
+                    <li key={s} className={i < stageIdx ? 'done' : i === stageIdx ? 'current' : ''}>
+                      <span className="dot">{i < stageIdx ? '✓' : i === stageIdx ? '●' : '○'}</span>
+                      {s}
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+              <div className="copy-row" style={{ marginTop: 14 }}>
+                <button className="btn btn-outline btn-sm" onClick={back}>← Back</button>
+                <button className="btn btn-primary btn-sm" onClick={reset}>Done</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NgoModal({ open, onClose }) {
+  const [search, setSearch] = useState('')
+  const [type, setType] = useState('All')
+  const [list, setList] = useState(null) // null = loading
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    if (!open) return undefined
+    setFailed(false)
+    setList(null)
+    const t = setTimeout(async () => {
+      try {
+        setList(await findOrganizations({ search, type }))
+      } catch {
+        setFailed(true)
+        setList([])
+      }
+    }, search ? 350 : 0)
+    return () => clearTimeout(t)
+  }, [open, search, type, attempt])
+
+  if (!open) return null
+
+  const reset = () => {
+    setSearch(''); setType('All'); setList(null); setFailed(false)
+    onClose()
+  }
+
+  return (
+    <div className="overlay" onClick={reset}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <h3>🔍 NGO / Rescuer Dhoondhein</h3>
+            <p>Apne paas animal help ke liye NGO ya rescuer khojein.</p>
+          </div>
+          <button className="x" onClick={reset} aria-label="Close">✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="field" style={{ marginBottom: 10 }}>
+            <label>Area, location ya NGO ka naam search karein</label>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="e.g. Civil Lines, Prayagraj"
+              autoComplete="off"
+            />
+          </div>
+          <div className="seg" style={{ marginBottom: 14 }}>
+            {['All', 'NGO', 'Rescuer'].map((t) => (
+              <button type="button" key={t} className={type === t ? 'on' : ''} onClick={() => setType(t)}>{t}</button>
+            ))}
+          </div>
+
+          {list === null ? (
+            <p className="loading-line"><span className="spinner green" /> Khoj rahe hain...</p>
+          ) : failed ? (
+            <div className="error-box">
+              ❌ List load nahi ho paayi.<br />Please try again.
+              <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 10 }} onClick={() => setAttempt((a) => a + 1)}>Try Again</button>
+            </div>
+          ) : list.length === 0 ? (
+            <div className="ngo-empty">
+              <span className="paw">🐾</span>
+              <b>Abhi NGO / Rescuer listings available nahi hain.</b>
+              <p>Hum verified animal-care NGOs aur rescuers ko gradually add kar rahe hain.</p>
+            </div>
+          ) : (
+            <div className="org-list">
+              {list.map((o, i) => (
+                <div className="org-card" key={i}>
+                  <div className="org-top">
+                    <b>{o.name}</b>
+                    <span className="org-type">{o.type === 'NGO' ? '🏥 NGO' : '🙋 Rescuer'}</span>
+                  </div>
+                  {o.verified ? <span className="verified">✓ Verified</span> : null}
+                  {[o.area, o.location].filter(Boolean).join(', ') ? (
+                    <p className="org-loc">📍 {[o.area, o.location].filter(Boolean).join(', ')}</p>
+                  ) : null}
+                  {o.description ? <p className="org-desc">{o.description}</p> : null}
+                  <div className="org-actions">
+                    {o.phone ? (
+                      <a className="btn btn-primary btn-sm" href={`tel:${o.phone.replace(/[^+\d]/g, '')}`}>📞 Call</a>
+                    ) : null}
+                    {o.instagram ? (
+                      <a className="btn btn-outline btn-sm" href={o.instagram} target="_blank" rel="noreferrer">📸 Instagram</a>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="tiny-note" style={{ marginTop: 16 }}>
+            PETORA Help khud NGO nahi hai.<br />
+            Hum citizens ko verified NGOs aur rescuers se connect karte hain.
+          </p>
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: 10 }} onClick={reset}>Done</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [lang, setLang] = useState('hinglish')
   const [menu, setMenu] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
+  const [trackOpen, setTrackOpen] = useState(false)
+  const [ngoOpen, setNgoOpen] = useState(false)
 
   const heroSub = lang === 'hinglish'
     ? 'Road par koi injured, sick ya needy animal dikhe? PETORA Help par report karein aur nearby NGO ya rescuer tak help pahunchayein.'
@@ -255,7 +487,7 @@ export default function App() {
               <span className="icon">📍</span>
               <h3>Find NGO / Rescuer</h3>
               <p>Apne paas animal-care NGO ya rescuer khojein.</p>
-              <button className="btn btn-primary" onClick={() => go('ngos')}>Find Help</button>
+              <button className="btn btn-primary" onClick={() => setNgoOpen(true)}>Find Help</button>
             </div>
             <div className="action-card">
               <span className="icon">❤️</span>
@@ -264,6 +496,9 @@ export default function App() {
               <button className="btn btn-primary" onClick={() => go('ngos')}>Help an NGO</button>
             </div>
           </div>
+          <p className="track-link">
+            📍 Report submit ki thi? <button type="button" onClick={() => setTrackOpen(true)}>Track Report →</button>
+          </p>
         </section>
 
         {/* BAS 3 STEPS */}
@@ -317,6 +552,8 @@ export default function App() {
       </footer>
 
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
+      <TrackModal open={trackOpen} onClose={() => setTrackOpen(false)} />
+      <NgoModal open={ngoOpen} onClose={() => setNgoOpen(false)} />
     </>
   )
 }

@@ -84,6 +84,23 @@ Expected: `status = 'Report Received'`, `created_at` filled,
 `media_type` like `image/jpeg` when a photo was attached.
 Uploaded files land in `backend/uploads/` (git-ignored, never public).
 
+Track lookup returns only `reportId, animalType, condition, location,
+status, createdAt` — never `contact_number`, `description`, or media.
+Test it: `curl http://localhost:4000/api/reports/PH-PRY-2026-00001`
+(unknown IDs return 404).
+
+## Organizations directory (Find NGO phase)
+
+`schema.sql` also creates the `organizations` table
+(`name, type, location, area, description, phone, instagram,
+verified, active, created_at`).
+**Never insert dummy rows** — the API's empty state covers "no data".
+
+`GET /api/organizations?search=&type=` returns active rows only,
+verified first, with public-safe fields. Search matches
+name/area/location literally (wildcards stripped); `type` accepts
+only `NGO`/`Rescuer` (anything else = All).
+
 ## Production (single server)
 
 ```bash
@@ -96,7 +113,8 @@ no proxy or extra config needed.
 
 ## Security notes
 
-- Public API has **only** `POST /api/reports` (create) + `GET /api/health`.
+- Public API has `POST /api/reports` (create), `GET /api/reports/:reportId`
+  (single-report tracking), + `GET /api/health`.
   There is **no endpoint that lists or reads reports**, so contact
   numbers never leak publicly. Admin access comes in Phase 2B.
 - All SQL uses prepared statements (`mysql2` placeholders) — no injection.

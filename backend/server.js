@@ -69,6 +69,84 @@ app.get('/api/health', async (_req, res) => {
   }
 })
 
+// Public report tracking: single-report lookup ONLY.
+// Returns public-safe fields — NEVER contact_number, description, or media.
+// There is intentionally NO endpoint that lists or browses reports.
+const PUBLIC_REPORT_ID = /^PH-PRY-\d{4}-\d+$/
+
+app.get('/api/reports/:reportId', async (req, res) => {
+  const reportId = String(req.params.reportId || '').trim().toUpperCase()
+  if (!PUBLIC_REPORT_ID.test(reportId) || reportId.length > 30) {
+    return res.status(404).json({ error: 'NOT_FOUND' })
+  }
+  try {
+    const [rows] = await pool.execute(
+      `SELECT report_id, animal_type, animal_condition, location, status, created_at
+       FROM reports WHERE report_id = ? LIMIT 1`,
+      [reportId]
+    )
+    if (!rows.length) {
+      return res.status(404).json({ error: 'NOT_FOUND' })
+    }
+    const r = rows[0]
+    return res.json({
+      reportId: r.report_id,
+      animalType: r.animal_type,
+      condition: r.animal_condition,
+      location: r.location,
+      status: r.status,
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
+    })
+  } catch (err) {
+    console.error('[PETORA Help] Report lookup failed')
+    return res.status(500).json({ error: 'SERVER_ERROR' })
+  }
+})
+
+// Public NGO/Rescuer directory: read-only, active records only,
+// public-safe fields only. No dummy data is ever seeded here —
+// rows are added later with real verified organization details.
+app.get('/api/organizations', async (req, res) => {
+  const rawType = String(req.query.type || 'All')
+  const type = rawType === 'NGO' || rawType === 'Rescuer' ? rawType : null
+  // Strip LIKE wildcards so search text is always matched literally.
+  const search = String(req.query.search || '').trim().slice(0, 80).replace(/[\\%_]/g, '')
+  try {
+    const conds = ['active = 1']
+    const params = []
+    if (type) {
+      conds.push('type = ?')
+      params.push(type)
+    }
+    if (search) {
+      const like = `%${search}%`
+      conds.push('(name LIKE ? OR area LIKE ? OR location LIKE ?)')
+      params.push(like, like, like)
+    }
+    const [rows] = await pool.execute(
+      `SELECT name, type, location, area, description, phone, instagram, verified
+       FROM organizations WHERE ${conds.join(' AND ')}
+       ORDER BY verified DESC, name ASC LIMIT 100`,
+      params
+    )
+    res.json(
+      rows.map((r) => ({
+        name: r.name,
+        type: r.type,
+        location: r.location,
+        area: r.area,
+        description: r.description,
+        phone: r.phone,
+        instagram: r.instagram,
+        verified: r.verified === 1,
+      }))
+    )
+  } catch (err) {
+    console.error('[PETORA Help] Organization lookup failed')
+    res.status(500).json({ error: 'SERVER_ERROR' })
+  }
+})
+
 app.post('/api/reports', (req, res) => {
   upload.single('media')(req, res, async (multerErr) => {
     if (multerErr) {

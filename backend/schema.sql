@@ -25,3 +25,23 @@ CREATE TABLE IF NOT EXISTS reports (
   INDEX idx_report_id (report_id),
   INDEX idx_status_created (status, created_at)
 ) ENGINE=InnoDB;
+
+-- Organizations directory (Find NGO / Rescuer phase).
+-- Rows are added ONLY with real verified organization details.
+-- NEVER seed dummy/fake data here. Public reads see active rows only.
+CREATE TABLE IF NOT EXISTS organizations (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name        VARCHAR(120) NOT NULL,
+  type        ENUM('NGO','Rescuer') NOT NULL,
+  location    VARCHAR(300) NOT NULL DEFAULT '',
+  area        VARCHAR(120) NOT NULL DEFAULT '',
+  description VARCHAR(1000) NOT NULL DEFAULT '',
+  phone       VARCHAR(15)  NOT NULL DEFAULT '',
+  instagram   VARCHAR(300) NOT NULL DEFAULT '',
+  verified    TINYINT(1)   NOT NULL DEFAULT 0,
+  active      TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX idx_org_active_verified (active, verified),
+  INDEX idx_org_search (name, area, location)
+) ENGINE=InnoDB;

@@ -64,6 +64,41 @@ fieldset:disabled .file{opacity:.6;cursor:not-allowed}
 @keyframes spin{to{transform:rotate(360deg)}}
 .copy-row{display:flex;gap:10px;margin-top:6px}
 .copy-row .btn{flex:1}
+
+/* TRACK REPORT */
+.track-link{text-align:center;color:var(--muted);font-size:14px;margin:14px 0 0}
+.track-link button{border:0;background:none;color:var(--green-700);font-weight:800;font-size:14px;cursor:pointer;padding:0;text-decoration:underline}
+.track-fields{background:#fbfdfb;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.track-fields div{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;font-size:14px;border-bottom:1px solid #eef3ef}
+.track-fields div:last-child{border-bottom:0}
+.track-fields span{color:var(--muted)}
+.track-fields b{text-align:right}
+.status-now{color:var(--green-800)}
+.timeline{list-style:none;margin:16px 0 0;padding:0}
+.timeline li{position:relative;display:flex;gap:12px;align-items:flex-start;padding:0 0 16px 4px;font-size:14.5px;font-weight:600;color:#9aa9a0}
+.timeline li:last-child{padding-bottom:0}
+.timeline li::before{content:"";position:absolute;left:13px;top:24px;bottom:0;width:2px;background:#e2eae3}
+.timeline li:last-child::before{display:none}
+.timeline .dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex-shrink:0;background:#eef2ee;color:#9aa9a0;border:1.5px solid #d5ded6}
+.timeline li.done{color:#33463c}
+.timeline li.done .dot{background:var(--green-700);border-color:var(--green-700);color:#fff}
+.timeline li.done::before{background:var(--green-600)}
+.timeline li.current{color:var(--green-900)}
+.timeline li.current .dot{background:#fff;border-color:var(--green-700);color:var(--green-700);box-shadow:0 0 0 4px var(--green-50)}
+
+/* FIND NGO / RESCUER */
+.loading-line{display:flex;align-items:center;gap:10px;justify-content:center;color:var(--muted);font-size:14.5px;font-weight:600;padding:18px 0}
+.spinner.green{border-color:#cfe7d6;border-top-color:var(--green-700)}
+.org-list{display:flex;flex-direction:column;gap:10px}
+.org-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fbfdfb}
+.org-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.org-top b{font-size:16px}
+.org-type{font-size:12px;font-weight:800;background:var(--green-50);border:1px solid #cfe7d6;color:var(--green-800);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.org-card .verified{margin-top:8px}
+.org-loc{margin:8px 0 0;font-size:13.5px;color:var(--muted);font-weight:600}
+.org-desc{margin:6px 0 0;font-size:14px;color:#33463c}
+.org-actions{display:flex;gap:8px;margin-top:12px}
+.org-actions .btn{flex:1}
 .hamburger{display:none;border:1px solid var(--line);background:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer}
 .mobile-menu{display:none;border-top:1px solid var(--line);background:#fff;padding:6px 4%}
 .mobile-menu a{display:block;padding:12px 8px;text-decoration:none;font-weight:700;border-bottom:1px solid #f0f0f0}

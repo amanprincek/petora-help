@@ -6,8 +6,12 @@
 
 - **Project:** PETORA Help (Phase 2A — Express + MySQL backend)
 - **Stack:** React 18 + Vite 5 frontend, Express 4 + MySQL 8 backend, no auth / payment
-- **Last Updated:** 2026-09-09
-- **Current Version:** v0.6.0 (MySQL-backed submission, tested live, build passing)
+- **Last Updated:** 2026-09-10
+- **Current Version:** v0.8.0 (Find NGO/Rescuer, tested live, build passing)
+
+> 🧊 **REPORT SYSTEM FROZEN** (per 2026-09-10): no changes to Report an
+> Animal, Track Report, submission, Report IDs, report tables/routes,
+> status timeline, or report privacy until the Report/Admin revisit.
 
 ---
 
@@ -17,8 +21,11 @@
 - [x] Report submission is REAL (MySQL): `POST /api/reports` → transaction-safe `AUTO_INCREMENT` ID (`PH-PRY-YYYY-XXXXX`) → photo to `backend/uploads/` → `reports` row (status "Report Received", timestamp)
 - [x] Honest states: loading ("Report submit ho rahi hai..."), real 400/500 errors + Try Again, success with Copy Report ID
 - [x] Secure by design: create-only public API (no list/read endpoint), prepared statements, 15MB image/video-only uploads outside web root
-- [x] Tested live against local MySQL 8.0 (2 reports + validation rejections); test data cleaned, counter reset
-- [x] Homepage UI untouched (same design, branding, sections)
+- [x] Report submission is REAL (MySQL) + public Track Report with 6-stage timeline — FROZEN, see notice above
+- [x] Find NGO/Rescuer: "Find Help" opens modal ("NGO / Rescuer Dhoondhein") with search + All/NGO/Rescuer filters, verified badges, Call/Instagram buttons, connector disclaimer, Done
+- [x] `organizations` table + read-only `GET /api/organizations` (active-only, public-safe fields, literal search, verified-first); zero dummy rows — honest empty state verified live
+- [x] Report system untouched and re-verified (submit → track); LIKE-wildcard bug found & fixed; stale-server testing pitfall identified (kill old port-4000 process before retesting)
+- [x] Homepage design, branding, and all other flows unchanged
 - [x] Responsive mobile-first design, Hinglish/हिंदी toggle (demo)
 - [x] `npm run build` passes
 - [x] Official logo integrated (navbar circle + favicon, from `src/logo.jpeg` / `public/logo.jpeg`)
@@ -46,6 +53,8 @@ npm run build
 
 | Date | Version | Change | Files Touched | Status |
 |------|---------|--------|---------------|--------|
+| 2026-09-10 | v0.8.0 | Find NGO/Rescuer: organizations table + read-only directory endpoint + modal (search, filters, empty state, disclaimer); "Find Help" opens it; report system frozen & re-verified; fixed LIKE-wildcard bug; docs updated | `backend/server.js`, `backend/schema.sql`, `src/api.js`, `src/App.jsx`, `src/index.css`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
+| 2026-09-10 | v0.7.0 | Track Report: server-side single-lookup endpoint (public-safe fields only) + modal with timeline, Back/Done; tiny link under actions; live-tested, test data cleaned | `backend/server.js`, `src/api.js`, `src/App.jsx`, `src/index.css`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
 | 2026-09-09 | v0.6.0 | MySQL switch: Firebase removed; new Express backend (report API, schema, health, prod static serving); frontend rewired via src/api.js; dev proxy; live-tested on local MySQL 8.0, test data cleaned; docs updated | `backend/`, `src/api.js`, `src/App.jsx`, `vite.config.js`, `.env.example`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` (removed: `src/firebase.js`, `src/reports.js`, `firestore.rules`, `storage.rules`, `FIREBASE_SETUP.md`) | ✅ Done, verified live |
 | 2026-09-09 | v0.5.0 | Phase 2A: real Firebase submission (atomic PH-PRY-YYYY-XXXXX IDs, Storage media, Firestore reports, loading/error/copy states, secure rules, setup guide); Firebase lazy-loaded; homepage untouched | `src/firebase.js`, `src/reports.js`, `src/App.jsx`, `src/index.css`, `firestore.rules`, `storage.rules`, `FIREBASE_SETUP.md`, `.env.example`, `.gitignore`, `package.json`, `README.md`, `PROGRESS.md` | ⚠️ Superseded by v0.6.0 (MySQL switch) |
 | 2026-09-09 | v0.4.0 | Visual-only pass: compact hero + warmer human-animal photo (with fallback), tinted action choices (red Report / green others), "Bas 3 Steps" strip, plain About text, single NGO empty state, tightened spacing, social placeholders | `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done |
