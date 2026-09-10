@@ -66,6 +66,30 @@ export async function findOrganizations({ search = '', type = 'All' } = {}) {
 }
 
 /**
+ * Lists open help requirements (public-safe fields only, NGO resolved).
+ * Pass { category } to filter; omit for all. Never returns Fulfilled rows.
+ * Throws coded errors: NETWORK | SERVER_ERROR.
+ */
+export async function listHelpRequests({ category = '' } = {}) {
+  const params = new URLSearchParams()
+  if (category) params.set('category', category)
+  let res
+  try {
+    res = await fetch(`${API_BASE}/api/help-requests?${params.toString()}`)
+  } catch {
+    const err = new Error('NETWORK')
+    err.code = 'NETWORK'
+    throw err
+  }
+  if (!res.ok) {
+    const err = new Error('SERVER_ERROR')
+    err.code = 'SERVER_ERROR'
+    throw err
+  }
+  return res.json()
+}
+
+/**
  * Submits a report. Throws with a user-safe message on failure.
  * @returns {Promise<string>} the human-readable reportId (e.g. PH-PRY-2026-00001)
  */

@@ -101,6 +101,19 @@ verified first, with public-safe fields. Search matches
 name/area/location literally (wildcards stripped); `type` accepts
 only `NGO`/`Rescuer` (anything else = All).
 
+## Help requirements (Donate / Help phase)
+
+`schema.sql` also creates `help_requests`
+(`org_id → organizations.id, title, category, description, quantity,
+status Needed/Partially Fulfilled/Fulfilled, location, timestamps`).
+**Never insert dummy rows** — the UI's empty state covers "no data".
+
+`GET /api/help-requests?category=` returns non-Fulfilled requests from
+active orgs only (NGO name + contact resolved via JOIN, verified first
+by recency). `category` accepts only the 5 known categories.
+There are intentionally **no create/edit/delete endpoints** and **no
+payment processing** — PETORA Help never receives donations.
+
 ## Production (single server)
 
 ```bash

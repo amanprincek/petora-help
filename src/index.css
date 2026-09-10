@@ -94,11 +94,28 @@ fieldset:disabled .file{opacity:.6;cursor:not-allowed}
 .org-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .org-top b{font-size:16px}
 .org-type{font-size:12px;font-weight:800;background:var(--green-50);border:1px solid #cfe7d6;color:var(--green-800);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.verified{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--green-800);background:var(--green-50);border:1px solid #cfe7d6;padding:5px 12px;border-radius:999px}
+.verified.tiny{font-size:11px;padding:2px 8px;margin-left:6px;vertical-align:1px}
 .org-card .verified{margin-top:8px}
 .org-loc{margin:8px 0 0;font-size:13.5px;color:var(--muted);font-weight:600}
 .org-desc{margin:6px 0 0;font-size:14px;color:#33463c}
 .org-actions{display:flex;gap:8px;margin-top:12px}
 .org-actions .btn{flex:1}
+
+/* DONATE / HELP */
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.cat-grid button{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fbfdfb;border-radius:12px;padding:10px 12px;font-weight:700;font-size:13.5px;cursor:pointer;text-align:left}
+.cat-grid button span{font-size:18px}
+.cat-grid button.on{background:var(--green-700);border-color:var(--green-700);color:#fff}
+.cat-grid button:last-child{grid-column:1 / -1}
+.req-status{font-size:11.5px;font-weight:800;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.req-status.needed{background:#fdeee6;color:#b33c12}
+.req-status.partial{background:var(--green-50);border:1px solid #cfe7d6;color:var(--green-800)}
+.help-steps{background:var(--beige);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;font-size:14px}
+.help-steps b{display:block;margin-bottom:6px}
+.help-steps ol{margin:0;padding-left:20px;color:#33463c}
+.help-steps li{margin:3px 0}
+.help-steps p{margin:10px 0 0;color:var(--muted);font-size:13.5px}
 .hamburger{display:none;border:1px solid var(--line);background:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer}
 .mobile-menu{display:none;border-top:1px solid var(--line);background:#fff;padding:6px 4%}
 .mobile-menu a{display:block;padding:12px 8px;text-decoration:none;font-weight:700;border-bottom:1px solid #f0f0f0}
@@ -153,7 +170,10 @@ fieldset:disabled .file{opacity:.6;cursor:not-allowed}
 .footer-inner nav{display:flex;gap:18px}
 .footer-inner nav a{color:#d7e9dd;text-decoration:none;font-size:14px;font-weight:600}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.15);margin-top:16px;padding-top:10px;font-size:13px;color:#a9c6b3;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.social-note{color:#8fb59b}
+.social-note{color:#8fb59b;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.social-note a{color:#d7e9dd;font-weight:700;text-decoration:none}
+.social-note a:hover{text-decoration:underline}
+.social-note .sep{opacity:.6}
 
 /* FORM + MODAL */
 .field label{display:block;font-size:13px;font-weight:800;margin-bottom:6px;color:#33463c}

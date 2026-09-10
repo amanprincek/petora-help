@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import logoImg from './logo.jpeg'
-import { findOrganizations, submitReport, trackReport } from './api.js'
+import { findOrganizations, listHelpRequests, submitReport, trackReport } from './api.js'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?q=80&w=1200&auto=format&fit=crop'
 const HERO_FALLBACK = 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop'
@@ -406,12 +406,134 @@ function NgoModal({ open, onClose }) {
   )
 }
 
+const HELP_CATEGORIES = [
+  ['💰', 'Financial Help'],
+  ['🍚', 'Food'],
+  ['🛏️', 'Beds / Blankets'],
+  ['💊', 'Medicines'],
+  ['👕', 'Clothes / Other Supplies'],
+]
+
+function DonateModal({ open, onClose }) {
+  const [category, setCategory] = useState('')
+  const [list, setList] = useState(null) // null = loading
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    if (!open) return undefined
+    setFailed(false)
+    setList(null)
+    let cancelled = false
+    listHelpRequests({ category })
+      .then((rows) => { if (!cancelled) setList(rows) })
+      .catch(() => { if (!cancelled) { setFailed(true); setList([]) } })
+    return () => { cancelled = true }
+  }, [open, category, attempt])
+
+  if (!open) return null
+
+  const reset = () => {
+    setCategory(''); setList(null); setFailed(false)
+    onClose()
+  }
+
+  return (
+    <div className="overlay" onClick={reset}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <h3>❤️ Kaise Help Karein?</h3>
+            <p>Verified NGOs ki current requirements dekhein aur apni capacity ke according help karein.</p>
+          </div>
+          <button className="x" onClick={reset} aria-label="Close">✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="cat-grid">
+            {HELP_CATEGORIES.map(([emoji, name]) => (
+              <button
+                type="button"
+                key={name}
+                className={category === name ? 'on' : ''}
+                onClick={() => setCategory((c) => (c === name ? '' : name))}
+              >
+                <span>{emoji}</span>{name}
+              </button>
+            ))}
+          </div>
+
+          {list === null ? (
+            <p className="loading-line"><span className="spinner green" /> Requirements dekh rahe hain...</p>
+          ) : failed ? (
+            <div className="error-box">
+              ❌ Requirements load nahi ho paayin.<br />Please try again.
+              <button type="button" className="btn btn-outline btn-sm" style={{ marginTop: 10 }} onClick={() => setAttempt((a) => a + 1)}>Try Again</button>
+            </div>
+          ) : list.length === 0 ? (
+            category ? (
+              <div className="ngo-empty">
+                <span className="paw">🤲</span>
+                <b>No current requirements in this category.</b>
+              </div>
+            ) : (
+              <div className="ngo-empty">
+                <span className="paw">🤲</span>
+                <b>Abhi koi specific requirement available nahi hai.</b>
+                <p>NGOs ki verified requirements yahan update ki jayengi.</p>
+                <p>PETORA Help par requirements regularly update hongi.</p>
+              </div>
+            )
+          ) : (
+            <div className="org-list">
+              {list.map((r, i) => (
+                <div className="org-card" key={i}>
+                  <div className="org-top">
+                    <b>{r.title}</b>
+                    <span className={`req-status ${r.status === 'Needed' ? 'needed' : 'partial'}`}>{r.status}</span>
+                  </div>
+                  <p className="org-loc">🏷️ {r.category}{r.quantity ? ` • ${r.quantity}` : ''}</p>
+                  <p className="org-desc">
+                    <b>{r.ngoName}</b>
+                    {r.ngoVerified ? <span className="verified tiny">✓ Verified NGO</span> : null}
+                    {r.location ? <><br />📍 {r.location}</> : null}
+                  </p>
+                  {r.description ? <p className="org-desc">{r.description}</p> : null}
+                  <div className="org-actions">
+                    {r.phone ? (
+                      <a className="btn btn-primary btn-sm" href={`tel:${r.phone.replace(/[^+\d]/g, '')}`}>📞 Call</a>
+                    ) : null}
+                    {r.instagram ? (
+                      <a className="btn btn-outline btn-sm" href={r.instagram} target="_blank" rel="noreferrer">📸 Instagram</a>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="help-steps">
+            <b>Help kaise karein?</b>
+            <ol>
+              <li>Jo requirement aap fulfill kar sakte hain, woh choose karein.</li>
+              <li>NGO ke available contact/Instagram option se connect karein.</li>
+              <li>NGO se confirm karke required help provide karein.</li>
+            </ol>
+            <p>PETORA Help khud donation receive nahi karta.<br />Hum citizens ko NGOs ki verified requirements tak pahunchne mein help karte hain.</p>
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: 10 }} onClick={reset}>Done</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [lang, setLang] = useState('hinglish')
   const [menu, setMenu] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [trackOpen, setTrackOpen] = useState(false)
   const [ngoOpen, setNgoOpen] = useState(false)
+  const [donateOpen, setDonateOpen] = useState(false)
 
   const heroSub = lang === 'hinglish'
     ? 'Road par koi injured, sick ya needy animal dikhe? PETORA Help par report karein aur nearby NGO ya rescuer tak help pahunchayein.'
@@ -493,7 +615,7 @@ export default function App() {
               <span className="icon">❤️</span>
               <h3>Donate / Help</h3>
               <p>NGO ki requirement ke according madad karein.</p>
-              <button className="btn btn-primary" onClick={() => go('ngos')}>Help an NGO</button>
+              <button className="btn btn-primary" onClick={() => setDonateOpen(true)}>Help an NGO</button>
             </div>
           </div>
           <p className="track-link">
@@ -537,7 +659,7 @@ export default function App() {
         <div className="container footer-inner">
           <div>
             <b>PETORA Help</b>
-            <p>Prayagraj se shuruaat.</p>
+            <p>Together for their better tomorrow.</p>
           </div>
           <nav>
             <a href="#home" onClick={(e) => { e.preventDefault(); go('home') }}>Home</a>
@@ -547,13 +669,18 @@ export default function App() {
         </div>
         <div className="container footer-bottom">
           <span>© PETORA Help</span>
-          <span className="social-note">📸 Instagram • 📘 Facebook — coming soon</span>
+          <span className="social-note">
+            <a href="https://www.instagram.com/pectora_help/" target="_blank" rel="noreferrer">📸 Instagram: @pectora_help</a>
+            <span className="sep">•</span>
+            <span>Website developed by <a href="https://www.instagram.com/aman_ac_1025/" target="_blank" rel="noreferrer">Aman</a></span>
+          </span>
         </div>
       </footer>
 
       <ReportModal open={reportOpen} onClose={() => setReportOpen(false)} />
       <TrackModal open={trackOpen} onClose={() => setTrackOpen(false)} />
       <NgoModal open={ngoOpen} onClose={() => setNgoOpen(false)} />
+      <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
     </>
   )
 }

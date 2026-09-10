@@ -45,3 +45,24 @@ CREATE TABLE IF NOT EXISTS organizations (
   INDEX idx_org_active_verified (active, verified),
   INDEX idx_org_search (name, area, location)
 ) ENGINE=InnoDB;
+
+-- Help requirements (Donate / Help phase).
+-- Rows reference organizations.id and are added ONLY with real verified
+-- NGO requirements. NEVER seed dummy/fake data here.
+-- Public reads see non-Fulfilled requests from active orgs only.
+CREATE TABLE IF NOT EXISTS help_requests (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  org_id      INT UNSIGNED NOT NULL,
+  title       VARCHAR(150) NOT NULL,
+  category    VARCHAR(40)  NOT NULL,
+  description VARCHAR(1000) NOT NULL DEFAULT '',
+  quantity    VARCHAR(100) NOT NULL DEFAULT '',
+  status      ENUM('Needed','Partially Fulfilled','Fulfilled') NOT NULL DEFAULT 'Needed',
+  location    VARCHAR(300) NOT NULL DEFAULT '',
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX idx_hr_status (status),
+  INDEX idx_hr_org (org_id),
+  CONSTRAINT fk_hr_org FOREIGN KEY (org_id) REFERENCES organizations(id)
+) ENGINE=InnoDB;

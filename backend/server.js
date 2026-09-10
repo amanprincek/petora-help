@@ -147,6 +147,58 @@ app.get('/api/organizations', async (req, res) => {
   }
 })
 
+// Public help requirements: read-only, open (non-Fulfilled) requests from
+// active organizations only, NGO details resolved via JOIN.
+// No create/edit/delete endpoints exist — requirements are managed
+// manually / via a future admin feature.
+const HELP_CATEGORIES = [
+  'Financial Help',
+  'Food',
+  'Beds / Blankets',
+  'Medicines',
+  'Clothes / Other Supplies',
+]
+
+app.get('/api/help-requests', async (req, res) => {
+  const rawCat = String(req.query.category || '')
+  const category = HELP_CATEGORIES.includes(rawCat) ? rawCat : null
+  try {
+    const conds = ["hr.status <> 'Fulfilled'", 'o.active = 1']
+    const params = []
+    if (category) {
+      conds.push('hr.category = ?')
+      params.push(category)
+    }
+    const [rows] = await pool.execute(
+      `SELECT hr.title, hr.category, hr.description, hr.quantity, hr.status,
+              hr.location, o.name AS ngoName, o.verified AS ngoVerified,
+              o.phone, o.instagram
+       FROM help_requests hr
+       JOIN organizations o ON o.id = hr.org_id
+       WHERE ${conds.join(' AND ')}
+       ORDER BY hr.created_at DESC LIMIT 100`,
+      params
+    )
+    res.json(
+      rows.map((r) => ({
+        title: r.title,
+        category: r.category,
+        description: r.description,
+        quantity: r.quantity,
+        status: r.status,
+        location: r.location,
+        ngoName: r.ngoName,
+        ngoVerified: r.ngoVerified === 1,
+        phone: r.phone,
+        instagram: r.instagram,
+      }))
+    )
+  } catch (err) {
+    console.error('[PETORA Help] Help-request lookup failed')
+    res.status(500).json({ error: 'SERVER_ERROR' })
+  }
+})
+
 app.post('/api/reports', (req, res) => {
   upload.single('media')(req, res, async (multerErr) => {
     if (multerErr) {

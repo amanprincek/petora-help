@@ -33,4 +33,5 @@ To replace: overwrite both files with the new image (same filenames).
 - Simple footer: Home, About, Contact + © PETORA Help
 - Report modal submits for real: `POST /api/reports` → MySQL `reports` row (status "Report Received") + photo saved on server. Returns atomic Report ID (`PH-PRY-YYYY-XXXXX`) with Copy button. See **MYSQL_SETUP.md**.
 - Track modal ("Track Report" link under the 3 actions): `GET /api/reports/:reportId` returns public-safe fields only + 6-stage progress timeline. No contact/description/media ever exposed.
-- Find NGO modal ("Find Help" button): search + All/NGO/Rescuer filters over `GET /api/organizations` (active rows, public-safe fields). Empty state until real verified data is added — zero fake entries.
+- Find NGO modal ("Find Help" button): search + All/NGO/Rescuer filters over `GET /api/organizations` (active rows, public-safe fields). Live with 2 verified entries (Love Shade for Animals, RakshaMAD) — added only with explicit approval, no invented fields.
+- Donate modal ("Help an NGO" button): 5 help categories (toggle filters) + open requirement cards from `GET /api/help-requests` (NGO name resolved, Call/Instagram from org data) + 3-step explainer. LIVE: 8 verified winter requirements from Love Shade for Animals (exact provided values) — no payment gateway, PETORA Help receives nothing.

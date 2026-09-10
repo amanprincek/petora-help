@@ -7,7 +7,7 @@
 - **Project:** PETORA Help (Phase 2A — Express + MySQL backend)
 - **Stack:** React 18 + Vite 5 frontend, Express 4 + MySQL 8 backend, no auth / payment
 - **Last Updated:** 2026-09-10
-- **Current Version:** v0.8.0 (Find NGO/Rescuer, tested live, build passing)
+- **Current Version:** v0.12.0 (footer: official Instagram + creator credit, build passing)
 
 > 🧊 **REPORT SYSTEM FROZEN** (per 2026-09-10): no changes to Report an
 > Animal, Track Report, submission, Report IDs, report tables/routes,
@@ -22,8 +22,12 @@
 - [x] Honest states: loading ("Report submit ho rahi hai..."), real 400/500 errors + Try Again, success with Copy Report ID
 - [x] Secure by design: create-only public API (no list/read endpoint), prepared statements, 15MB image/video-only uploads outside web root
 - [x] Report submission is REAL (MySQL) + public Track Report with 6-stage timeline — FROZEN, see notice above
+- [x] Find NGO/Rescuer directory LIVE with 2 explicitly-authorized verified entries (Love Shade for Animals, RakshaMAD) — exact values only, no invented fields
 - [x] Find NGO/Rescuer: "Find Help" opens modal ("NGO / Rescuer Dhoondhein") with search + All/NGO/Rescuer filters, verified badges, Call/Instagram buttons, connector disclaimer, Done
-- [x] `organizations` table + read-only `GET /api/organizations` (active-only, public-safe fields, literal search, verified-first); zero dummy rows — honest empty state verified live
+- [x] Donate/Help modal + `help_requests` table (FK → organizations) + read-only endpoint (excludes Fulfilled, strict category allowlist)
+- [x] 8 REAL Love Shade winter requirements live (exact titles/quantities/categories, shared description, all Needed, linked to existing org row — no duplicates, no invented prices/urgency)
+- [x] Modal now shows cards with Verified NGO badge; per-category empty message ("No current requirements in this category."); explainer + disclaimer kept; Instagram CTA from stored org data, no Call button (no phone)
+- [x] Verified live: 8 total, Beds→5 / Clothes→2 / Food→1 / Financial→empty exact splits; fixed 2 encoding bugs (shell-mangled en-dash → control char → proper U+2013, HEX-verified); frozen systems untouched; build passes
 - [x] Report system untouched and re-verified (submit → track); LIKE-wildcard bug found & fixed; stale-server testing pitfall identified (kill old port-4000 process before retesting)
 - [x] Homepage design, branding, and all other flows unchanged
 - [x] Responsive mobile-first design, Hinglish/हिंदी toggle (demo)
@@ -53,6 +57,10 @@ npm run build
 
 | Date | Version | Change | Files Touched | Status |
 |------|---------|--------|---------------|--------|
+| 2026-09-10 | v0.12.0 | Footer only: official Instagram link (@pectora_help), "Website developed by Aman" credit link, tagline "Together for their better tomorrow."; removed Facebook placeholder; nothing else touched | `src/App.jsx`, `src/index.css`, `PROGRESS.md` | ✅ Done, build passing |
+| 2026-09-10 | v0.11.0 | 8 real Love Shade winter requirements (exact values, all Needed, linked org); modal shows cards + Verified NGO badge + per-category empty message; explainer/disclaimer kept; frozen systems untouched; fixed en-dash encoding (HEX-verified) | (data: 8 `help_requests` rows) + `src/App.jsx`, `src/index.css`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
+| 2026-09-10 | v0.10.0 | Donate/Help: help_requests table (FK → organizations) + read-only endpoint + modal (categories, cards, exact empty-state copy, explainer, disclaimer); "Help an NGO" opens it; join/exclusion logic proven with temp row then deleted; frozen systems intact; no payment code | `backend/server.js`, `backend/schema.sql`, `src/api.js`, `src/App.jsx`, `src/index.css`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
+| 2026-09-10 | v0.9.0 | Added 2 authorized verified NGOs (Love Shade for Animals, RakshaMAD) with exact provided values only; all directory queries verified live; no code/UI/report changes | (data only — no files changed except `README.md`, `PROGRESS.md`) | ✅ Done, verified live |
 | 2026-09-10 | v0.8.0 | Find NGO/Rescuer: organizations table + read-only directory endpoint + modal (search, filters, empty state, disclaimer); "Find Help" opens it; report system frozen & re-verified; fixed LIKE-wildcard bug; docs updated | `backend/server.js`, `backend/schema.sql`, `src/api.js`, `src/App.jsx`, `src/index.css`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
 | 2026-09-10 | v0.7.0 | Track Report: server-side single-lookup endpoint (public-safe fields only) + modal with timeline, Back/Done; tiny link under actions; live-tested, test data cleaned | `backend/server.js`, `src/api.js`, `src/App.jsx`, `src/index.css`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` | ✅ Done, verified live |
 | 2026-09-09 | v0.6.0 | MySQL switch: Firebase removed; new Express backend (report API, schema, health, prod static serving); frontend rewired via src/api.js; dev proxy; live-tested on local MySQL 8.0, test data cleaned; docs updated | `backend/`, `src/api.js`, `src/App.jsx`, `vite.config.js`, `.env.example`, `MYSQL_SETUP.md`, `README.md`, `PROGRESS.md` (removed: `src/firebase.js`, `src/reports.js`, `firestore.rules`, `storage.rules`, `FIREBASE_SETUP.md`) | ✅ Done, verified live |
